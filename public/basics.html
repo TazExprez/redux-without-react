@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/main.css" />
+    <title>Document</title>
+    <script src="https://unpkg.com/redux@latest/dist/redux.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <button id="button">change background</button>
+    <script>
+        // Now we are actually using Redux.
+        const { createStore, combineReducers } = Redux;
+        // This is the same as the code above.
+        // var createStore = Redux.createStore;
+        // var combineReducers = Redux.combineReducers;
+
+        // This shows us the Redux methods.
+        // console.log(Redux);
+
+        // Action Creators
+        // Action Creators are functions that return back an object.
+        // The Action Creator is the function.
+        // The action is the object that gets returned.
+        // const CLICKED_BUTTON = () => {
+        // If you want, you can pass in the color to the action creator function, instead of having one assigned beforehand.
+        const CLICKED_BUTTON = (color) => {
+            // Action
+            return {
+                type: "CLICKED_BUTTON",
+                // payload: "red",
+                // Here the payload is assigned by the argument above.
+                payload: color,
+            }
+        };
+
+        // Reducers
+        // Some people don't like to pass an empty {} to the reducer and decide to use a new variable.  They want there to be something inside of the object, like below.
+        const initialState = {
+            color: "blue",
+        };
+        // The Reducer is going to handle the action and return us our state.
+        // We are going to pass in two paramenters. The first one is going to be our initial state.  If we don't pass any state, we want to put in a default.  We will put in state = {}, state is set to an empty object.  The next parameter is the action.
+        // const viewReducer = (state = {}, action) => {
+        const viewReducer = (state = initialState, action) => {
+            // Here you can use an if statement, but sometimes there are a bunch of actions that you have to handle, so it's better to use a switch statement.
+            switch (action.type) {
+                case "CLICKED_BUTTON":
+                    // The state is coming in at blue.
+                    // console.log(initialState);
+                    // Now the state gets merged below.  The color property gets overwritten and goes from blue to red.  And then we are basically passing down the new state.
+                    // It's important to remember to keep your data immutable.  This means that we are not changing the original state.  We are taking the original state and creating a new one.
+                    // You cannot simply do state.color = "red"; because you are now mutating the data, and you don't want that to happen.  In the case below, you are adding the color: "red"; property to the state.
+                    // state.color = "red";
+                    // Here we are passing in an empty object, the state, which is also an empty object and another object containing the color.  The action object contains the "CLICKED_BUTTON" name, or type, and the color, which is the payload and it's red.
+                    let newState = Object.assign({}, state, {
+                        color: action.payload,
+                    });
+                    // This is so that we can see what is happening.
+                    // console.log(newState);
+                    // Because this reducer needs to return back the new state, we have to come here and put in something like return newState; down here.
+                    // This newState is the state that is going to be changing the actual view.
+                    return newState;
+                    break;
+                default:
+                    // By default, we're going to be returning the state.  This is because at first, there won't be any action being triggered, but the reducer will be triggered.  Because the reducer is going to be triggered, we need to return back the initial state that you want this to be.
+                    return state;
+                    break;
+            }
+        };
+
+        // Now we are going to try this out.  Technically this is all going to happen with Redux automatically for you, but we are going to try this out.
+        // viewReducer({}, CLICKED_BUTTON());
+        // Instead of using the console.log() in the viewReducer(), we can now do it down here because it returns something in the return newState; section.
+        // console.log(viewReducer({}, CLICKED_BUTTON()));
+        // Now you are not passing in an empty state {} to the reducer.  Now you are starting the reducer with the initialState variable.
+        // Now you can remove this because it was just used to show some things temporarily.
+        // console.log(viewReducer(initialState, CLICKED_BUTTON()));
+
+        // Now we are going to use all of our reducers put together.  We pass in all of our reducers in the object that we are passing in to the combineReducers().  We only have one reducer so far, viewReducer, so we are only going to pass that in.
+        const allReducers = combineReducers({
+            // We're passing in the name of the property to be viewReducer, just like the name of the reducer that we're passing in.
+            viewReducer: viewReducer
+        });
+
+        // Now we are going to create our store.  Our store is what holds all of our data.
+        // This is how Redux works.  Redux has one main store, and this is how you should do it.
+        // You should create only one store and within that store, you can create multiple reducers.
+        const store = createStore(allReducers);
+
+        // Now that we have a store created, we can use a couple of methods that come with the store.  We've already seen one method, which is the getState().  The getState() gives us back all of our reducers and basically the states that are within them.
+
+        // This will return back an object, which holds our store.  Inside of this object, {viewReducer: {}}, we have the property of our viewReducer.
+        // If you check inside the viewReducer object, you'll notice that it's an empty object.  The reason this is happening is because the initial state that is passed to the viewReducer is an empty object.  If you pass the initialState object, {color: "blue"}, then the viewReducer object is going to be {color: "blue"}, instead.  Do this if you want to have an initial state that is not an empty object.
+        // console.log(store.getState());
+
+        // console.log(`====================================Initial Store`);
+        // console.log(store.getState());
+        // console.log(`====================================Updated Store with Action CLICKED_BUTTON`);
+        // We are passing in the CLICKED_BUTTON() variable to store.dispatch().  We are passing in a function that is returning an {} to another function.  It could also be returning another type of data set, according to Joe.
+        // store.dispatch(CLICKED_BUTTON());
+        // Now we are assigning the color here, instead of having a default one in the payload.
+        // store.dispatch(CLICKED_BUTTON("purple"));
+        // console.log(store.getState());
+
+        const button = document.getElementById("button");
+
+        button.addEventListener("click", () => {
+            // Inside of this function, we are going to dispatch our action.
+            store.dispatch(CLICKED_BUTTON("red"));
+        });
+
+        // We are also going to create a render function.
+        const render = () => {
+            // You can call this state, or whatever you want to call it.  Joe is calling it appState in order to differentiate it from the state of the viewReducer and avoid confusion.
+            // We are going to trigger the store.getState() and then we are going to add the viewReducer {}.
+            const appState = store.getState().viewReducer;
+            console.log(`====================================State`);
+            console.log(appState);
+            document.body.style.backgroundColor = appState.color;
+        };
+
+        // Here we are running the render().
+        render();
+
+        // In our initial state, the color is blue.
+        // The moment we click on the change background button, the background is going to turn to red.
+        // The first time we clicked the change background button, nothing appeared to have happened.  This is because now we have to subscribe to the changes of the store.
+
+        // Once there are any changes within the store, we are going to run the render() again.
+        // Here we are passing in the render() to Redux and we are saying, hey now that we have our store set up, we have everything there, I want you to run the render() every time there is a change in our store.
+        store.subscribe(render);
+</script>
+</body>
+</html>
+
+<!-- We have our view, which is the browser page.  Once we click on the change background button, we are automatically triggering a function which is going to be our action creator.  The action creator creates an object, which we call an action.  The action has a name, which is called the type.  It also has a payload, which can be an array, an object, a number, or anything else that you want to pass in through the payload.  The payload is just data that you are passing down.  From here, after the action is created, we are sending the action to the dispatcher.  The dispatcher looks at all of the reducers and passes to them all of the actions.  It tells them, hey something got triggered, this CLICKED_BUTTON.  So the reducer that is holding the switch case for the "CLICKED_BUTTON" action.type, the viewReducer will get the "CLICKED_BUTTON" case triggered, while the other potential reducers will only have the default case get triggered.  The viewReducer will get the state passed in as a parameter by the dispatcher.  The default state is just an empty object, there is nothing in there.  The action is also passed in to the viewReducer as another parameter by the dispatcher.  Once the action gets passed in to the viewReducer, the action will get triggered.  This will provide access of the action to the viewReducer.  Now inside of the viewReducer, the function of the viewReducer looks around for a case, with the switch statement, that matches "CLICKED_BUTTON."  This doesn't necessarily have to be a switch statement and can be an if statement, or an else/if statement.  It doesn't matter.  Joe prefers a switch statement because it's easier.  Now the switch statement matches "CLICKED_BUTTON."  So now what we're doing is we're taking the old state and we're going to put it into a new state.  We created a variable newState with let newState = Object.assign({}, state, {color: action.payload});.  Object.assign() is going to look at the old state, state, and the new state {color: action.payload}, which is also an object.  We are saying in this new state that we want to change the color.  We have the action.payload, which is the data that we passed down through the object, which just says "red."  We have this property called color and we want it to be red.  We are going to take the state {} and the {color: action.payload} and they are going to merge.  For example, if the state was {color: "blue"}, now it would change to {color: "red"}.  Now this Object.assign() will return back a new {} and this new {} will have the new state. -->
+<!-- After this you have a method called allReducers() and you are basically saying combine all of the reducers into one {}.  Give it a property of the viewReducer, pass in whatever is inside of the viewReducer.  We are combining that.  Now, inside of our store, we're saying create a store will all of the reducers.  And then now, when we say console.log(store.getState());, we get all of our store with all of our reducers inside of it. -->
+<!-- The moment that we combine our reducers, and we pass in all of our reducers, in const allReducers = combineReducers({viewReducer: viewReducer});, and we pass in all of our reducers to createStore() in const store = createStore(allReducers);, what's happening is that it's triggering all of the reducer functions that we have here.  Right now we only have one, but if we had multiple reducer functions, they would all get triggered.  In the line const allReducers = combineReducers({viewReducer: viewReducer});, we are not passing in a state or an action.  By default, the state will be equal to the initialState, {color: "blue"}, here.  It could have been equal to an empty {}, if we wanted, whatever you prefer.  Because we don't pass anything to the reducer in the line const allReducers = combineReducers({viewReducer: viewReducer});, we don't pass anything to the params, by default, it's looking at the state to be the initialState variable, {color: "blue"}.  It's looking at the viewReducer() and runs it.  Once it runs it, it says hey, I am not receiving any action.type, there is nothing happening.  Because it's not receiving any action, what's going to happen is that the reducer is going to be returning the default state.  This is going to be the first thing that happens.  This is why we have the initial store in the console.log(store.getState()); line.  Automatically we get {viewReducer: {color: "blue"}}.  The moment we do an action and we dispatch it, and we say the action is CLICKED_BUTTON in line store.dispatch(CLICKED_BUTTON());, CLICKED_BUTTON is going to return an {}, which is going to have the action.type, which is "CLICKED_BUTTON", and the payload, which is going to be "red."  What's going to happen now is that this action, CLICKED_BUTTON, is going to go through the dispatch in the line store.dispatch(CLICKED_BUTTON()); and dispatch() is going to pass it to all of the reducers.  Whichever reducer has a switch case for an action.type of "CLICKED_BUTTON" is going to go in and say ok, this is where the action.type actually belongs.  The dispatch() is going to send the action through this particular reducer that has the "CLICKED_BUTTON" switch case.  From there the new state will be created with the line let newState = Object.assign({}, state, {color: action.payload});.  Here we take the old state and merge it with the new state, which is an object.  Joe wants the state to be an {}, but it could actually be anything, a number, a string, or anything else.  For Joe, it's easier to deal with the state when it's an {}.  Once you find a property of color in the old state, merge it together with the new state.  Both {}s are merged by Object.assign() in order to create a new {}, which is going to be within the new state.  Now, after this, we are returning the new state in the line return newState; because the switch case "CLICKED_BUTTON" was matched.  Once we return the new state, Redux looks at it and says hey, let me update our store.  So now the store is updated.  Once you run the line console.log(store.getState());, you will see that the updated store says color: "red." -->
+<!-- We are just basically passing things down.  The action creators are just functions that return objects.  The object is passed down to the dispatch.  The dispatch passes the object to every single reducer.  Whichever reducer matches the action.type of the action {} will return back a new state.  Now this new state gets passed down to the whole store. -->
+<!-- Think of it like this, you are going from one thing to another.  You are passing it down, you're going from function to function and handling it.  Once it gets to the reducer, then from there the state changes.  And then the view is going to rerender itself once the state changes. -->
+<!-- When we click the change background button, this is going to trigger a function.  This function is going to trigger the dispatch.  We're going to pass in what type of action was used to the dispatch. -->
+<!-- We have our action creators.  These are just functions.  We have our reducers, which basically handle our state and return back our state.  We have combineReducers().  We have a variable where we create our store on the line const store = createStore(allReducers);.  Then we have a button element and we add an event listener to it.  Once the button is clicked, it is going to dispatch the CLICKED_BUTTON("red").  This action creator will return back an {}.  This {} will be sent to all of the reducers through the dispatch().  The dispatch() comes to the viewReducer() and says this is the one that matches the action.type of "CLICKED_BUTTON" in the switch statement.  In the next line, Object.assign() is merging the old state with the new state.  Then we are sending this merged state into the newState variable as a new {}.  This new {} gets sent back, returned as a new state, and that changes our store.  So now we have a new state.  Once you press the change background button, the background will automatically change to red.  For you to be able to render again, you have to subscribe to the store.  If you don't subscribe to the store, no changes will be apparent when you click on the change background button.  So you subscribe to the store, like shown on the line store.subscribe(render);, and say hey whenever there's a change within the store, within any of the reducers inside of the store, you are going to run the render().  The way we are changing the color, once we run the render(), we are saying get the store, get the state, go into the viewReducer {}, and we're calling it appState, like shown on the line const appState = store.getState().viewReducer;.  Within the appState {} we have a property called color.  Then we are setting the document.body.style.backgroundColor to whatever we have in the appState {}, like on the line document.body.style.backgroundColor = appState.color;.  Because we subscribed to the store, whenever we did a change and clicked on the change background button, automatically the store said there was a change so now it's going to look at the appState {} data on the line const appState = store.getState().viewReducer, and it's going to rerender again from what we had before, running the render(). The background will change from the initial state of blue to red. -->
+<!-- With Redux, you are basically just creating your action creators.  Next you create your reducers, how you want to handle your data once the actions kick in.  Then you combine your reducers.  Then from there you create your store with all of your reducers.  Then you just handle it how you would handle any type of JavaScript.  The only two things that are different from anything else are that there is a store.dispatch(), which handles the action being changed, and then the store.subscribe(), which basically runs the function you want to be run every single time that there's a change within your store. -->
